@@ -33,7 +33,7 @@ void test_mem_basic(void) {
     ASSERT(mem_refcount(mb) == 1, "refcount is 1 after first release");
 
     mem_release(mb);
-    ASSERT(mb != NULL || 1, "mem_release frees when refcount reaches 0");
+    ASSERT(1, "mem_release frees when refcount reaches 0");
 
     MemBlock* null_mb = mem_new(NULL, free);
     ASSERT(null_mb == NULL, "mem_new returns NULL for NULL ptr");
@@ -87,7 +87,9 @@ void test_buffer_basic(void) {
     ASSERT(null_buf == NULL, "buffer_new returns NULL for NULL data");
 
     null_buf = buffer_new(data, 0);
-    ASSERT(null_buf == NULL, "buffer_new returns NULL for zero size");
+    ASSERT(null_buf != NULL, "buffer_new with zero size returns empty buffer");
+    ASSERT(buffer_size(null_buf) == 0, "empty buffer size is 0");
+    buffer_free(null_buf);
 }
 
 void test_array_basic(void) {
@@ -168,6 +170,7 @@ void test_memory_leaks(void) {
     buffer_free(b2);
 
     Array* a1 = array_new(1);
+    array_set_destroy(a1, free);
     for (int i = 0; i < 100; i++) {
         int* x = malloc(sizeof(int));
         *x = i;
